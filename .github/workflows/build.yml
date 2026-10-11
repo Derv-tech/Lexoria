@@ -24,13 +24,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-
       - name: Unpack Lexoria
         run: unzip -o Lexoria_Android_Project.zip -d .
 
       - name: Build Android APK
         run: gradle -p LexoriaAndroid assembleDebug
-
+         
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
