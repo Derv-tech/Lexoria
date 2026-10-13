@@ -1,9 +1,11 @@
+
 name: Build Lexoria APK
 
 on:
   workflow_dispatch:
   push:
     paths:
+      - 'Lexoria_Android_Project_Fixed.zip'
       - 'Lexoria_Android_Project.zip'
       - '.github/workflows/build.yml'
 
@@ -11,10 +13,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Get project
+      - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -24,14 +26,23 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Unpack Lexoria
-        run: unzip -o Lexoria_Android_Project.zip -d .
+
+      - name: Unpack corrected Lexoria project
+        run: unzip -o Lexoria_Android_Project_Fixed.zip -d .
+
+      - name: Verify Java and Kotlin targets
+        run: |
+          grep -q 'sourceCompatibility = JavaVersion.VERSION_17' LexoriaAndroid/app/build.gradle.kts
+          grep -q 'targetCompatibility = JavaVersion.VERSION_17' LexoriaAndroid/app/build.gradle.kts
+          grep -q 'jvmTarget = "17"' LexoriaAndroid/app/build.gradle.kts
 
       - name: Build Android APK
         run: gradle -p LexoriaAndroid assembleDebug
-         
+
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
           name: Lexoria-debug-APK
           path: LexoriaAndroid/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          
